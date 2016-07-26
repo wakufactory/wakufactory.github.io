@@ -45,7 +45,7 @@ input[type=range] {
 #map {
     width: 800px;
     height: 800px ;
-    transform:translateY(-44.4px) scaleX(2.792) scaleY(2.792) perspective(122.5px)  rotateX(32.49deg) rotateZ(147.24deg) ;
+    transform:translateY(-44.4px) scaleX(2.792) scaleY(2.792) perspective(122.5px)  rotateX(32.49deg) rotateZ(0) ;
 }
 </style>
 <script>
@@ -75,10 +75,11 @@ onload = function() {
 	
 	navigator.geolocation.getCurrentPosition( function(pos) {
 		console.log(pos) ;
+		map.setView([pos.coords.latitude,pos.coords.longitude],16) ;
 	}) ;
 	
 //	map.setView([35+(39/60)+(8.6)/3600, 139+(39/60)+(53.7/3600)], 16);
-	map.setView([35+(41/60)+(46)/3600, 139+(45/60)+(7/3600)], 16);
+//	map.setView([35+(41/60)+(46)/3600, 139+(45/60)+(7/3600)], 16);
 	
 	$('input[type=range]').on("input",function(){
 		var s = 4.0 *$('#r_scale').val()/1000 ;
