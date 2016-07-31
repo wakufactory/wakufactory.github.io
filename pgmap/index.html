@@ -100,7 +100,9 @@ $(function() {
 		tz = dz ;
 	}) ;
 	navigator.geolocation.watchPosition( function(pos) {
+		console.log(pos.coords.latitude+"/"+pos.coords.longitude);
 		map.setView([pos.coords.latitude, pos.coords.longitude], 16);
+		getimg() ;
 	}) ;
  })
 
