@@ -2,8 +2,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>pmap</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<title>pgmap</title>
 
 <link rel="stylesheet" href="leaflet.css" />
 <script src="leaflet.js"></script>
@@ -103,6 +104,9 @@ $(function() {
 		console.log(pos.coords.latitude+"/"+pos.coords.longitude);
 		map.setView([pos.coords.latitude, pos.coords.longitude], 16);
 		getimg() ;
+	},function(err){
+		console.log(err) ;
+		alert("位置情報が取得出来ません") ;
 	}) ;
  })
 
