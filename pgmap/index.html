@@ -5,11 +5,17 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <title>pgmap</title>
+<meta name="description" content="ポケGOのマップと同じ画角の地理院地図。国土地理院のタイルマップデータを利用しています。"/>
+<meta name="keywords" content="地理院地図"/>
+<meta property="og:title" content="pgmap"/>
+<meta property="og:type" content="website"/>
+<meta property="og:description" content="ポケGOのマップと同じ画角の地理院地図。国土地理院のタイルマップデータを利用しています。"/>
+<meta property="og:url" content="https://wakufactory.github.io/pgmap/"/>
+<meta property="og:image" content="https://wakufactory.github.io/pgmap/ogimg.png"/>
 
 <link rel="stylesheet" href="leaflet.css" />
 <script src="leaflet.js"></script>
 <script   src="https://code.jquery.com/jquery-2.2.4.min.js"   integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="   crossorigin="anonymous"></script>
-
 </head>
 <style>
 html, body {
@@ -50,26 +56,19 @@ $(function() {
 	var map = L.map('smap' ,{
 		scrollWheelZoom:false,doubleClickZoom:false,zoomControl:false
 	});
-
 	L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png', {
 	    attribution: ""
 	}).addTo(map);
-	map.setView([35+(41/60)+(46)/3600, 139+(45/60)+(7/3600)], 16);
+	map.setView([35+(38/60)+(36.5/3600), 139+(40/60)+(53.9/3600)], 16);
 	
-	function setTrans(x,z,p,s,y) {
-		var t = "translateY("+y+"px) scaleX("+s+") scaleY("+s+") perspective("+p+"px)  rotateX("+x+"deg) rotateZ("+z+"deg)" ;
-//		console.log(t) ;
-		$('#map canvas').css("transform",t) ;
-	}
-	setTrans(20.8,0,35,6,164) ;
-	map.on('moveend',function() {
-		getimg() ;
-	})
-	setTimeout(function() {
-		getimg() ;
-	},1000);
-	var pi = 3.14159265 ;
 	var tz = 0 ;
+	var p = JSON.parse(localStorage.getItem("pgmap"))  ;
+	if(p) { 
+		tz = p.rotz ;
+	}
+	setTrans(20.8,tz,35,6,164) ;
+
+	var pi = 3.14159265 ;
 	var sx,sy,f,th,dz ;
 	var cx = 160 ;
 	var cy = 164+200 ;
@@ -91,48 +90,61 @@ $(function() {
 		if(dx<0) t = t+pi ;		
 		dz = tz + ((180*(t-th)/pi)+360)%360 ;
 		setTrans(20.8,dz,35,6,164) ;
+		var p = JSON.parse(localStorage.getItem("pgmap"))  ;
+		if(!p) p = {"rotz":0} ;
+		p.rotz = dz ;
+		localStorage.setItem("pgmap",JSON.stringify(p)) ;
 //		return false ;
 	}) ;
 	$('#map').on("mouseup touchend",function(ev) {
 		f = false ;
 		tz = dz ;
 	}) ;
+	map.on('moveend',function() {
+		getimg() ;
+	})
+	setTimeout(function() {
+		getimg() ;
+	},1000);
 	navigator.geolocation.watchPosition( function(pos) {
-		console.log(pos.coords.latitude+"/"+pos.coords.longitude);
+//		console.log(pos.coords.latitude+"/"+pos.coords.longitude);
 		map.panTo([pos.coords.latitude, pos.coords.longitude]);
 		getimg() ;
 	},function(err){
-		console.log(err) ;
+//		console.log(err) ;
 		alert("位置情報が取得出来ません") ;
 	}) ;
+	function setTrans(x,z,p,s,y) {
+		var t = "translateY("+y+"px) scaleX("+s+") scaleY("+s+") perspective("+p+"px)  rotateX("+x+"deg) rotateZ("+z+"deg)" ;
+		$('#map canvas').css("transform",t) ;
+	}
+	function getimg() {
+		var m = $('div.leaflet-map-pane').css('transform').split(",") ;
+		var bx = parseInt(m[4]) ;
+		var by = parseInt(m[5]) ;
+		var ctx = document.getElementById('mapc').getContext('2d');
+		var im = document.querySelectorAll("div.leaflet-tile-container img" );
+		for(i=0;i<im.length;i++) {
+			var o = im[i] ;
+				var s = o.src ;
+				var ox = $(o).position().left +bx ;
+				var oy = $(o).position().top +by ;
+				ctx.drawImage(o,0,0,256,256,ox,oy,256,256) ;	
+		}
+		ctx.strokeStyle = 'rgba(250,50,50,0.8)';
+		ctx.lineWidth = 2.0 ;
+		ctx.beginPath();
+		ctx.moveTo(400-5,400) ;
+		ctx.lineTo(400+5,400) ;
+		ctx.moveTo(400,400-5) ;
+		ctx.lineTo(400,400+5) ;
+		ctx.closePath();
+		ctx.stroke();
+	}
  })
 
 
-function getimg() {
-	var m = $('div.leaflet-map-pane').css('transform').split(",") ;
-	var bx = parseInt(m[4]) ;
-	var by = parseInt(m[5]) ;
-//	console.log(bx+"/"+by);
-	var ctx = document.getElementById('mapc').getContext('2d');
-	var im = document.querySelectorAll("div.leaflet-tile-container img" );
-	for(i=0;i<im.length;i++) {
-		var o = im[i] ;
-			var s = o.src ;
-			var ox = $(o).position().left +bx ;
-			var oy = $(o).position().top +by ;
-//			console.log(s+":"+ox+"-"+oy) ;
-			ctx.drawImage(o,0,0,256,256,ox,oy,256,256) ;	
-	}
-	ctx.strokeStyle = 'rgba(250,50,50,0.8)';
-	ctx.lineWidth = 2.0 ;
-	ctx.beginPath();
-	ctx.moveTo(400-5,400) ;
-	ctx.lineTo(400+5,400) ;
-	ctx.moveTo(400,400-5) ;
-	ctx.lineTo(400,400+5) ;
-	ctx.closePath();
-	ctx.stroke();
-}
+
 </script>
 <body>
 <div id="map"><canvas id=mapc width=800 height=800></canvas></div>
