@@ -54,9 +54,6 @@ $(function() {
 	L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png', {
 	    attribution: ""
 	}).addTo(map);
-	
-
-	
 	map.setView([35+(41/60)+(46)/3600, 139+(45/60)+(7/3600)], 16);
 	
 	function setTrans(x,z,p,s,y) {
@@ -102,7 +99,7 @@ $(function() {
 	}) ;
 	navigator.geolocation.watchPosition( function(pos) {
 		console.log(pos.coords.latitude+"/"+pos.coords.longitude);
-		map.setView([pos.coords.latitude, pos.coords.longitude], 16);
+		map.panTo([pos.coords.latitude, pos.coords.longitude]);
 		getimg() ;
 	},function(err){
 		console.log(err) ;
